@@ -17,13 +17,15 @@ export default async function Home({ searchParams }: Props) {
   // In a real world app, The pagination is implemented in the backend api
   // But since restcountries api doesn't support pagination, I'm fetching all data and doing pagination in the frontend
   const { data, hasError, errorMessage } = await readAllCountries();
+  console.log('🚀 ~ Home ~ errorMessage:', errorMessage);
   console.log('🚀 ~ Home ~ hasError:', hasError);
   // console.log('🚀 ~ Home ~ errorMessage:', errorMessage);
 
-  const countries =
-    data?.slice((currentPage - 1) * dataPerPage, currentPage * dataPerPage) ||
-    [];
-  console.log('🚀 ~ Home ~ countries:', countries);
-
-  return <HomeView countries={countries} />;
+  return (
+    <HomeView
+      countries={data || []}
+      currentPage={currentPage}
+      dataPerPage={dataPerPage}
+    />
+  );
 }

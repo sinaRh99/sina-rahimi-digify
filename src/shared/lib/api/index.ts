@@ -23,7 +23,6 @@ export async function fetcher<T>(
       data,
     };
   } catch (error) {
-    console.error(error);
     let errorMessage = 'Unknown error occurred';
 
     if (error instanceof Error) {
