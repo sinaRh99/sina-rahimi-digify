@@ -8,6 +8,7 @@
     "shared/model/constants",
     "views/pages",
     "shared/ui/pagination",
-    "shared/libs/hooks"
+    "shared/libs/hooks",
+    "shared/model/types"
   ]
 }
