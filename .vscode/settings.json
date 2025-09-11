@@ -1,0 +1,13 @@
+{
+  "conventionalCommits.scopes": [
+    "views/home",
+    "root",
+    "pages-router",
+    "shared/libs/api",
+    "entities/country",
+    "shared/model/constants",
+    "views/pages",
+    "shared/ui/pagination",
+    "shared/libs/hooks"
+  ]
+}
