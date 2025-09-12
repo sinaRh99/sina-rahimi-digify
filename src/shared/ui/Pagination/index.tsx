@@ -2,14 +2,12 @@
 // Also, it's not big enough to be considered a feature that's why i didn't place it on @features
 'use client';
 
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-
 interface Props {
   currentPage: number;
   lastPage: number;
   padding?: number;
   className?: string;
+  onPageChange: (page: number) => void;
 }
 
 export const Pagination = ({
@@ -17,10 +15,8 @@ export const Pagination = ({
   lastPage,
   padding = 1,
   className,
+  onPageChange,
 }: Props) => {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-
   // I'm using min and max to calculate the start and end page numbers
   // This way I can ensure that the pagination links don't go out of bounds
   // e.g if current page is 1 and padding is 2, I don't want to show -1, 0, 1, 2, 3
@@ -40,13 +36,6 @@ export const Pagination = ({
     ]),
   ];
 
-  const handleNavigate = (page: number) => {
-    if (page === currentPage) return;
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('page', page.toString());
-    router.push(`?${params.toString()}`);
-  };
-
   return (
     <div className={`flex gap-2 justify-center ${className}`}>
       {pages.map((page, i) => {
@@ -62,7 +51,7 @@ export const Pagination = ({
                   ? 'bg-amber-400'
                   : 'bg-cyan-400 hover:bg-cyan-300'
               } flex items-center justify-center text-black text-xs font-extrabold cursor-pointer`}
-              onClick={() => handleNavigate(page)}
+              onClick={() => onPageChange(page)}
             >
               {page}
             </span>

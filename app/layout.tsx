@@ -6,11 +6,11 @@ export const metadata: Metadata = {
   title: WEBSITE_TITLE,
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
+interface Props {
   children: React.ReactNode;
-}>) {
+}
+
+export default async function RootLayout({ children }: Props) {
   return (
     <html lang="en">
       <body className="bg-slate-900 text-white h-screen">

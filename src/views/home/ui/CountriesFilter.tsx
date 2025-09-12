@@ -1,19 +1,29 @@
 'use client';
 
+import { useStore } from '@app/store/store';
 import { useDebounce } from '@shared/lib/hooks/useDebounce';
 import { Select } from '@shared/ui/Select';
 import { TextField } from '@shared/ui/TextField';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ChangeEvent, useEffect, useState, useTransition } from 'react';
+import { useShallow } from 'zustand/shallow';
 
 const values = [12, 24, 34, 56];
 
-interface Props {
-  dataPerPage: number;
-  search: string;
-}
+const useFilterData = () =>
+  useStore(
+    useShallow(store => ({
+      search: store.searchQuery,
+      dataPerPage: store.perPage,
+      setDataPerPage: store.setPerPage,
+      setSearchQuery: store.setSearchQuery,
+    }))
+  );
 
-export const CountriesFilter = ({ dataPerPage, search }: Props) => {
+export const CountriesFilter = () => {
+  const { search, dataPerPage, setDataPerPage, setSearchQuery } =
+    useFilterData();
+
   const [query, setQuery] = useState(search);
   const debouncedQuery = useDebounce(query);
   const [isPending, startTransition] = useTransition();
@@ -27,6 +37,7 @@ export const CountriesFilter = ({ dataPerPage, search }: Props) => {
     // create a new params object
     params.set('perPage', String(e.target.value)); // update only `perPage` param
     router.push(`?${params.toString()}`); // navigate to the new url
+    setDataPerPage(Number(e.target.value));
   };
 
   useEffect(() => {
@@ -38,8 +49,9 @@ export const CountriesFilter = ({ dataPerPage, search }: Props) => {
       // create a new params object
       params.set('search', debouncedQuery); // update only `search` param
       router.push(`?${params.toString()}`); // navigate to the new url
+      setSearchQuery(debouncedQuery);
     });
-  }, [debouncedQuery, isPending, search, searchParams, router]);
+  }, [debouncedQuery, isPending, search, searchParams, router, setSearchQuery]);
 
   return (
     <div className="pb-8 pt-4">

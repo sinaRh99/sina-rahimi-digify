@@ -14,24 +14,35 @@ import { InfiniteScrollLoader } from './InfiniteScrollLoader';
 import { Country } from '@entities/country/model/types';
 import { CountryCard } from '@entities/country/ui';
 import { useIsMobile } from '@shared/lib/hooks/useIsMobile';
-import { Pagination } from '@shared/ui/Pagination';
+import { useShallow } from 'zustand/shallow';
+import { useStore } from '@app/store/store';
+
+const usePaginationData = () =>
+  useStore(
+    useShallow(store => ({
+      currentPage: store.currentPage,
+      lastPage: store.getLastPage(),
+    }))
+  );
 
 interface Props {
   children: React.ReactNode;
-  initialPage: number;
-  lastPage: number;
-  fetchCountries: (page: number) => Promise<Country[]>;
+  // initialPage: number;
+  // lastPage: number;
+  // fetchCountries: (page: number) => Promise<Country[]>;
 }
 
 export const InfiniteScroll = ({
   children,
-  initialPage,
-  lastPage,
-  fetchCountries,
-}: Props) => {
+}: // initialPage,
+// lastPage,
+// fetchCountries,
+Props) => {
+  const { currentPage, lastPage } = usePaginationData();
+
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const [topPage, setTopPage] = useState(initialPage); // its a flag that keeps track of current page for data loaded on top of the initial data
+  const [topPage, setTopPage] = useState(currentPage); // its a flag that keeps track of current page for data loaded on top of the initial data
   // countries loaded on top of the initial data
   // each time a new batch of countries is fetched, we will append them at the start of this array
   // so that we can show them in the correct order
@@ -40,7 +51,7 @@ export const InfiniteScroll = ({
   // followed by countries of initial page 3
   const [previousCountries, setPreviousCountries] = useState<Country[]>([]);
 
-  const [bottomPage, setBottomPage] = useState(initialPage); // its a flag that keeps track of current page for data loaded at the bottom of the initial data
+  const [bottomPage, setBottomPage] = useState(currentPage); // its a flag that keeps track of current page for data loaded at the bottom of the initial data
 
   // countries loaded at the bottom of the initial data
   // each time a new batch of countries is fetched, we will append them at the end of this array
@@ -56,6 +67,10 @@ export const InfiniteScroll = ({
     // scroll the window a little so the topLoader does not trigger immediately on mount
     window.scrollTo({ top: 150 });
   }, []);
+
+  const fetchCountries = async () => {
+    return Promise.resolve([]);
+  };
 
   return (
     <div>
