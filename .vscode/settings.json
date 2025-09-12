@@ -9,6 +9,7 @@
     "views/pages",
     "shared/ui/pagination",
     "shared/libs/hooks",
-    "shared/model/types"
+    "shared/model/types",
+    "shared/ui/text-field"
   ]
 }
