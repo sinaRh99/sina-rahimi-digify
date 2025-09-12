@@ -10,6 +10,7 @@
     "shared/ui/pagination",
     "shared/libs/hooks",
     "shared/model/types",
-    "shared/ui/text-field"
+    "shared/ui/text-field",
+    "shared/ui/select"
   ]
 }
