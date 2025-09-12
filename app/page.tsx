@@ -1,6 +1,5 @@
 import { readAllCountries } from '@entities/country/api';
 import { HomeView } from '@views/home';
-
 interface Props {
   searchParams: Promise<{ page?: string; perPage?: string }>;
 }
@@ -16,10 +15,7 @@ export default async function Home({ searchParams }: Props) {
   // Fetching all countries data from restcountries api
   // In a real world app, The pagination is implemented in the backend api
   // But since restcountries api doesn't support pagination, I'm fetching all data and doing pagination in the frontend
-  const { data, hasError, errorMessage } = await readAllCountries();
-  console.log('🚀 ~ Home ~ errorMessage:', errorMessage);
-  console.log('🚀 ~ Home ~ hasError:', hasError);
-  // console.log('🚀 ~ Home ~ errorMessage:', errorMessage);
+  const { data } = await readAllCountries();
 
   return (
     <HomeView

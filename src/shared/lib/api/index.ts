@@ -25,6 +25,7 @@ export async function fetcher<T>(
   } catch (error) {
     let errorMessage = 'Unknown error occurred';
 
+    console.log('🚀 ~ fetcher ~ error:', error);
     if (error instanceof Error) {
       // Any thrown JS Error
       errorMessage = error.message;

@@ -9,11 +9,12 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { InfiniteScrollLoader } from './InfiniteScrollLoader';
 import { Country } from '@entities/country/model/types';
 import { CountryCard } from '@entities/country/ui';
 import { useIsMobile } from '@shared/lib/hooks/useIsMobile';
+import { Pagination } from '@shared/ui/Pagination';
 
 interface Props {
   children: React.ReactNode;
@@ -28,6 +29,8 @@ export const InfiniteScroll = ({
   lastPage,
   fetchCountries,
 }: Props) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const [topPage, setTopPage] = useState(initialPage); // its a flag that keeps track of current page for data loaded on top of the initial data
   // countries loaded on top of the initial data
   // each time a new batch of countries is fetched, we will append them at the start of this array
@@ -49,6 +52,11 @@ export const InfiniteScroll = ({
 
   const isMobile = useIsMobile();
 
+  useEffect(() => {
+    // scroll the window a little so the topLoader does not trigger immediately on mount
+    window.scrollTo({ top: 150 });
+  }, []);
+
   return (
     <div>
       {isMobile && topPage > 1 && (
@@ -61,7 +69,10 @@ export const InfiniteScroll = ({
           }}
         />
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div
+        ref={containerRef}
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+      >
         {isMobile &&
           previousCountries.map(country => (
             <CountryCard key={country.cca3} country={country} />
@@ -72,7 +83,15 @@ export const InfiniteScroll = ({
             <CountryCard key={country.cca3} country={country} />
           ))}
       </div>
-      {isMobile && topPage < lastPage && (
+      {!isMobile && lastPage > 1 && (
+        <Pagination
+          currentPage={initialPage}
+          lastPage={lastPage}
+          padding={1}
+          className="mt-8"
+        />
+      )}
+      {isMobile && bottomPage < lastPage && (
         <InfiniteScrollLoader
           fetchCountries={fetchCountries}
           page={bottomPage + 1}

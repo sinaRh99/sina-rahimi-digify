@@ -19,10 +19,12 @@ export const HomeView = ({ countries, currentPage, dataPerPage }: Props) => {
 
   const lastPage = Math.ceil(countries.length / dataPerPage);
 
-  async function fetchCountries(page: number, perPage = 12) {
+  async function fetchCountries(page: number) {
     'use server';
-    await new Promise(resolve => setTimeout(resolve, 10_000));
-    return countries.slice((page - 1) * perPage, page * perPage);
+
+    //  I've simulated network delay here to show the loader
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    return countries.slice((page - 1) * dataPerPage, page * dataPerPage);
   }
 
   return (
