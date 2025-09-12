@@ -83,14 +83,7 @@ export const InfiniteScroll = ({
             <CountryCard key={country.cca3} country={country} />
           ))}
       </div>
-      {!isMobile && lastPage > 1 && (
-        <Pagination
-          currentPage={initialPage}
-          lastPage={lastPage}
-          padding={1}
-          className="mt-8"
-        />
-      )}
+
       {isMobile && bottomPage < lastPage && (
         <InfiniteScrollLoader
           fetchCountries={fetchCountries}
