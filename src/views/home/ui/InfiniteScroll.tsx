@@ -90,7 +90,6 @@ export const InfiniteScroll = ({ children }: Props) => {
 
   const previousCountries = useMemo(() => {
     const anchor = Math.min(topAnchor, currentPage);
-    console.log('🚀 ~ InfiniteScroll ~ topAnchor:', topAnchor);
     if (anchor === currentPage) return [];
     return filteredCountries.slice(
       (anchor - 1) * perPage,
@@ -100,7 +99,6 @@ export const InfiniteScroll = ({ children }: Props) => {
 
   const moreCountries = useMemo(() => {
     const anchor = Math.max(Math.min(botAnchor, lastPage), currentPage);
-    console.log('🚀 ~ InfiniteScroll ~ botAnchor:', botAnchor);
     if (anchor === currentPage) return [];
     return filteredCountries.slice(currentPage * perPage, botAnchor * perPage);
   }, [filteredCountries, perPage, currentPage, botAnchor, lastPage]);
