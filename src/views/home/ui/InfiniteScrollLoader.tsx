@@ -26,12 +26,34 @@ export const InfiniteScrollLoader = ({
   const loaderRef = useRef<HTMLDivElement | null>(null);
   const isMobile = useIsMobile();
 
+  /**
+   * Tracks whether an IntersectionObserver instance has already been created.
+   * Prevents creating multiple observers, which could lead to:
+   * - Duplicate intersection callbacks
+   * - Unnecessary performance overhead
+   * - Unexpected or inconsistent loader behavior
+   */
+  const hasIntersectionObserver = useRef(false);
+
   useEffect(() => {
     // Top loader is always present, but we check to avoid TypeScript errors
     // Also, we only observe on mobile to prevent unnecessary observers on desktop
     if (!loaderRef.current || !isMobile) return;
 
     const loader = loaderRef.current;
+
+    /**
+     * Sets up an IntersectionObserver for the loader element to track its visibility.
+     *
+     * Behavior:
+     * 1. Checks `hasIntersectionObserver` to avoid creating multiple observers,
+     *    which could lead to duplicate callbacks and performance issues.
+     * 2. If no observer exists, creates one and observes the `loader` element.
+     * 3. Updates the loader spinner progress based on `entry.intersectionRatio`.
+     * 4. Uses a threshold array from 0 to 1 in 0.01 increments for smooth, granular progress updates.
+     * 5. Marks `hasIntersectionObserver.current = true` to indicate an active observer
+     */
+    if (hasIntersectionObserver.current) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -46,9 +68,14 @@ export const InfiniteScrollLoader = ({
     );
 
     observer.observe(loader);
-
+    hasIntersectionObserver.current = true;
+    /**
+     * Cleanup:
+     * - On unmount, unobserves the loader and resets `hasIntersectionObserver.current = false`.
+     */
     return () => {
       observer.unobserve(loader);
+      hasIntersectionObserver.current = false;
     };
   }, [isMobile]);
 
