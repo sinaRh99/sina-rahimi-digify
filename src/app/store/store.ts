@@ -7,6 +7,14 @@ const minMax = (num: number, min: number, max: number) => {
   return Math.max(Math.min(num, max), min);
 };
 
+const resetPagination = (page: number) => ({
+  currentPage: page,
+  topAnchor: page,
+  botAnchor: page,
+  previousCountries: [],
+  moreCountries: [],
+});
+
 /**
  * Interface defining the global store state and actions.
  */
@@ -38,16 +46,12 @@ export interface StoreInterface extends StoreState {
  */
 function getDefaultInitialState(): StoreState {
   return {
-    currentPage: 1,
     lastPage: 1,
     perPage: 12,
     searchQuery: "",
     totalCountries: [],
     filteredCountries: [],
-    topAnchor: 1,
-    botAnchor: 1,
-    previousCountries: [],
-    moreCountries: [],
+    ...resetPagination(1),
   };
 }
 
@@ -89,11 +93,7 @@ export function initializeStore(preloadedState: PreloadedStoreInterface) {
       const { lastPage } = get();
       const page = minMax(currentPage, 1, lastPage);
       return set({
-        currentPage: page,
-        topAnchor: page,
-        botAnchor: page,
-        previousCountries: [],
-        moreCountries: [],
+        ...resetPagination(page),
       });
     },
 
@@ -107,11 +107,7 @@ export function initializeStore(preloadedState: PreloadedStoreInterface) {
       return set({
         perPage,
         lastPage,
-        currentPage: page,
-        topAnchor: page,
-        botAnchor: page,
-        previousCountries: [],
-        moreCountries: [],
+        ...resetPagination(page),
       });
     },
 
@@ -132,11 +128,7 @@ export function initializeStore(preloadedState: PreloadedStoreInterface) {
         searchQuery,
         filteredCountries,
         lastPage,
-        currentPage: page,
-        topAnchor: page,
-        botAnchor: page,
-        previousCountries: [],
-        moreCountries: [],
+        ...resetPagination(page),
       });
     },
 
