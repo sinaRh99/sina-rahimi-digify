@@ -15,15 +15,18 @@ npm run start
 
 ---
 
-## Project Structure
+## Project Organization
 
-The project is organized using **Feature Sliced Design (FSD)** ([documentation](https://feature-sliced.design/docs/get-started/overview)).  
-I personally like the philosophy of this architecture: splitting the application into entities, features, and smaller widgets makes coding more enjoyable.  
-I also tried to write components and UI blocks that might be **reusable** in the future whenever possible.
+This project follows the principles of **Feature-Sliced Design (FSD)** ([documentation](https://feature-sliced.design/docs/get-started/overview)).
+
+I like this architectural approach because it encourages splitting the application into meaningful layers such as entities, features, and widgets. This separation not only keeps the codebase maintainable but also makes coding more enjoyable.
+
+Throughout this project, I tried to demonstrate how I think ahead when structuring components:
+
+- **Pagination**: Although currently only used on the home page, I placed it inside a shared `ui` block named `Pagination`. This way, the component stays independent of where it’s used and how its state changes are handled, making it reusable in the future.
+- **Fetcher helper**: I built a small utility function that abstracts API requests and consistently returns `data`, an `errorMessage`, and an error state. This helps reduce repetition and keeps components focused on rendering logic instead of handling fetch details.
 
 ---
-
-## Project Functionality
 
 ### Initial Load
 

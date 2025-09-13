@@ -11,14 +11,14 @@
  * - Scrolling up shows previous countries; scrolling down shows next countries.
  * - Handles anchors for top and bottom to manage the range of countries displayed.
  */
-"use client";
+'use client';
 
-import { useEffect, useRef, useTransition } from "react";
-import { InfiniteScrollLoader } from "./InfiniteScrollLoader";
-import { CountryCard } from "@entities/country/ui";
-import { useIsMobile } from "@shared/lib/hooks/useIsMobile";
-import { useShallow } from "zustand/shallow";
-import { useStore } from "@app/store/store";
+import { useEffect, useRef, useTransition } from 'react';
+import { InfiniteScrollLoader } from './InfiniteScrollLoader';
+import { CountryCard } from '@entities/country/ui';
+import { useIsMobile } from '@shared/lib/hooks/useIsMobile';
+import { useShallow } from 'zustand/shallow';
+import { useStore } from '@app/store/store';
 
 /**
  * Custom hook to select country-related state and actions from the store.
@@ -37,7 +37,7 @@ import { useStore } from "@app/store/store";
  */
 const useCountries = () =>
   useStore(
-    useShallow((store) => ({
+    useShallow(store => ({
       previousCountries: store.previousCountries,
       moreCountries: store.moreCountries,
       resetPagination: store.resetPagination,
@@ -139,7 +139,7 @@ export const InfiniteScroll = ({ children }: Props) => {
       scrollTriggered.current = true;
     };
 
-    container.addEventListener("scroll", handleScroll);
+    container.addEventListener('scroll', handleScroll);
 
     isListenerAttachedRef.current = true;
     /**
@@ -148,10 +148,10 @@ export const InfiniteScroll = ({ children }: Props) => {
      *   `isListenerAttachedRef.current` to `false` to indicate no active listener.
      */
     return () => {
-      container.removeEventListener("scroll", handleScroll);
+      container.removeEventListener('scroll', handleScroll);
       isListenerAttachedRef.current = false;
     };
-  }, [isMobile]);
+  }, [isMobile, resetPagination]);
 
   /**
    * Handles updates to anchors when top or bottom loaders intersect with the viewport.
@@ -169,8 +169,8 @@ export const InfiniteScroll = ({ children }: Props) => {
    *
    * @param loader - Indicates which loader triggered the intersection (`'top'` or `'bot'`).
    */
-  const handlerLoaderIntersect = (loader: "top" | "bot") => {
-    if (loader === "top") {
+  const handlerLoaderIntersect = (loader: 'top' | 'bot') => {
+    if (loader === 'top') {
       // Top loader logic
       if (scrollTriggered.current) {
         startTopTransition(() => {
@@ -200,13 +200,13 @@ export const InfiniteScroll = ({ children }: Props) => {
         {topAnchor > 1 && (
           <InfiniteScrollLoader
             isPending={isTopPending}
-            onLoaderIntersect={() => handlerLoaderIntersect("top")}
+            onLoaderIntersect={() => handlerLoaderIntersect('top')}
           />
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {/* Previous countries (prepended at the top) */}
-          {previousCountries.map((country) => (
+          {previousCountries.map(country => (
             <CountryCard key={country.cca3} country={country} />
           ))}
 
@@ -214,7 +214,7 @@ export const InfiniteScroll = ({ children }: Props) => {
           {children}
 
           {/* More countries (appended at the bottom) */}
-          {moreCountries.map((country) => (
+          {moreCountries.map(country => (
             <CountryCard key={country.cca3} country={country} />
           ))}
         </div>
@@ -227,7 +227,7 @@ export const InfiniteScroll = ({ children }: Props) => {
         {botAnchor < lastPage && (
           <InfiniteScrollLoader
             isPending={isBotPending}
-            onLoaderIntersect={() => handlerLoaderIntersect("bot")}
+            onLoaderIntersect={() => handlerLoaderIntersect('bot')}
           />
         )}
       </div>
