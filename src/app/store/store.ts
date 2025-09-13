@@ -8,6 +8,9 @@ export interface StoreInterface {
   perPage: number;
   searchQuery: string;
   totalCountries: Country[];
+  filteredCountries: Country[];
+  topAnchor: number;
+  botAnchor: number;
   setCurrentPage: (page: number) => void;
   setPerPage: (perPage: number) => void;
   setSearchQuery: (query: string) => void;
@@ -15,6 +18,10 @@ export interface StoreInterface {
   getFilteredCountries: () => Country[];
   getSlicedCountries: (page: number) => Country[];
   getCurrentPage: () => number;
+  setTopAnchor: (anchor: number) => void;
+  setBotAnchor: (anchor: number) => void;
+  getPreviousCountries: () => Country[];
+  getMoreCountries: () => Country[];
 }
 
 function getDefaultInitialState() {
@@ -23,6 +30,8 @@ function getDefaultInitialState() {
     perPage: 12,
     searchQuery: '',
     totalCountries: [],
+    topAnchor: 1,
+    botAnchor: 1,
   } as const;
 }
 
@@ -45,15 +54,26 @@ export function initializeStore(preloadedState: PreloadedStoreInterface) {
     ...getDefaultInitialState(),
     ...preloadedState,
     setCurrentPage: currentPage => {
+      const { getLastPage } = get();
       return set({
-        currentPage,
+        currentPage: Math.min(currentPage, getLastPage()),
+        topAnchor: currentPage,
+        botAnchor: currentPage,
       });
     },
     setPerPage: perPage =>
       set({
         perPage,
       }),
-    setSearchQuery: searchQuery => set({ searchQuery }),
+    setSearchQuery: searchQuery => {
+      const { totalCountries } = get();
+      const filteredCountries = totalCountries.filter(country =>
+        `${country.name.common}${country.cca3}`
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
+      );
+      return set({ searchQuery, filteredCountries });
+    },
     getLastPage: () => {
       const { getFilteredCountries, perPage } = get();
       return Math.max(Math.ceil(getFilteredCountries().length / perPage), 1);
@@ -70,8 +90,44 @@ export function initializeStore(preloadedState: PreloadedStoreInterface) {
       const { getLastPage, currentPage } = get();
       return Math.min(currentPage, getLastPage());
     },
-    getSlicedCountries: () => {
-      return [];
+    getSlicedCountries: page => {
+      const { getFilteredCountries, perPage } = get();
+      return getFilteredCountries().slice((page - 1) * perPage, page * perPage);
+    },
+    setTopAnchor: topAnchor => set({ topAnchor }),
+    setBotAnchor: botAnchor => set({ botAnchor }),
+    getPreviousCountries: () => {
+      const { filteredCountries, perPage, getCurrentPage, topAnchor } = get();
+
+      const currentPage = getCurrentPage();
+      const anchor = Math.min(topAnchor, currentPage);
+
+      if (anchor === currentPage) return [];
+
+      return filteredCountries.slice(
+        (anchor - 1) * perPage,
+        currentPage * perPage
+      );
+    },
+    getMoreCountries: () => {
+      const {
+        getFilteredCountries,
+        perPage,
+        getCurrentPage,
+        botAnchor,
+        getLastPage,
+      } = get();
+
+      const lastPage = getLastPage();
+      const currentPage = getCurrentPage();
+      const anchor = Math.max(Math.min(botAnchor, lastPage), currentPage);
+
+      if (anchor === currentPage) return [];
+
+      return getFilteredCountries().slice(
+        currentPage * perPage,
+        botAnchor * perPage
+      );
     },
   }));
 }

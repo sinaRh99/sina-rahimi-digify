@@ -9,106 +9,129 @@
 
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useTransition } from 'react';
 import { InfiniteScrollLoader } from './InfiniteScrollLoader';
-import { Country } from '@entities/country/model/types';
 import { CountryCard } from '@entities/country/ui';
 import { useIsMobile } from '@shared/lib/hooks/useIsMobile';
 import { useShallow } from 'zustand/shallow';
 import { useStore } from '@app/store/store';
 
-const usePaginationData = () =>
+const useCountries = () =>
   useStore(
     useShallow(store => ({
+      filteredCountries: store.filteredCountries,
+      perPage: store.perPage,
       currentPage: store.currentPage,
       lastPage: store.getLastPage(),
+      topAnchor: store.topAnchor,
+      setTopAnchor: store.setTopAnchor,
+      botAnchor: store.botAnchor,
+      setBotAnchor: store.setBotAnchor,
     }))
   );
 
 interface Props {
   children: React.ReactNode;
-  // initialPage: number;
-  // lastPage: number;
-  // fetchCountries: (page: number) => Promise<Country[]>;
 }
 
-export const InfiniteScroll = ({
-  children,
-}: // initialPage,
-// lastPage,
-// fetchCountries,
-Props) => {
-  const { currentPage, lastPage } = usePaginationData();
+export const InfiniteScroll = ({ children }: Props) => {
+  const scrollTriggered = useRef(false);
 
+  const {
+    topAnchor,
+    setTopAnchor,
+    filteredCountries,
+    perPage,
+    currentPage,
+    lastPage,
+    botAnchor,
+    setBotAnchor,
+  } = useCountries();
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const [topPage, setTopPage] = useState(currentPage); // its a flag that keeps track of current page for data loaded on top of the initial data
-  // countries loaded on top of the initial data
-  // each time a new batch of countries is fetched, we will append them at the start of this array
-  // so that we can show them in the correct order
-  // e.g if initial page is 3 and user scrolls up to fetch page 2, then page 1
-  // the countries array will have countries of page 1 at the start followed by countries of page 2
-  // followed by countries of initial page 3
-  const [previousCountries, setPreviousCountries] = useState<Country[]>([]);
-
-  const [bottomPage, setBottomPage] = useState(currentPage); // its a flag that keeps track of current page for data loaded at the bottom of the initial data
-
-  // countries loaded at the bottom of the initial data
-  // each time a new batch of countries is fetched, we will append them at the end of this array
-  // so that we can show them in the correct order
-  // e.g if initial page is 3 and user scrolls down to fetch page 4, then page 5
-  // the countries array will have countries of initial page 3 followed by countries of page 4
-  // followed by countries of page 5
-  const [nextCountries, setNextCountries] = useState<Country[]>([]);
+  const [isTopPending, startTopTransition] = useTransition();
+  const [isBotPending, startBotTransition] = useTransition();
 
   const isMobile = useIsMobile();
 
   useEffect(() => {
+    if (!containerRef.current) return;
+
+    const container = containerRef.current;
+
+    const handleScroll = () => {
+      scrollTriggered.current = true;
+    };
+
+    container.addEventListener('scroll', handleScroll);
+
     // scroll the window a little so the topLoader does not trigger immediately on mount
-    window.scrollTo({ top: 150 });
+    containerRef.current.scrollTo({ top: 240 });
+
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
-  const fetchCountries = async () => {
-    return Promise.resolve([]);
+  const handlerLoaderIntersect = (loader: 'top' | 'bot') => {
+    if (loader === 'top') {
+      if (scrollTriggered.current) {
+        startTopTransition(() => {
+          setTopAnchor(topAnchor - 1);
+          scrollTriggered.current = false;
+          containerRef.current?.scrollTo({ top: 240 });
+        });
+      }
+    } else {
+      startBotTransition(() => {
+        setBotAnchor(botAnchor + 1);
+      });
+    }
   };
 
-  return (
-    <div>
-      {isMobile && topPage > 1 && (
-        <InfiniteScrollLoader
-          fetchCountries={fetchCountries}
-          page={topPage - 1}
-          setCountries={countries => {
-            setPreviousCountries(prev => [...countries, ...prev]);
-            setTopPage(prev => Math.max(prev - 1, 1));
-          }}
-        />
-      )}
-      <div
-        ref={containerRef}
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-      >
-        {isMobile &&
-          previousCountries.map(country => (
-            <CountryCard key={country.cca3} country={country} />
-          ))}
-        {children}
-        {isMobile &&
-          nextCountries.map(country => (
-            <CountryCard key={country.cca3} country={country} />
-          ))}
-      </div>
+  const previousCountries = useMemo(() => {
+    const anchor = Math.min(topAnchor, currentPage);
+    console.log('🚀 ~ InfiniteScroll ~ topAnchor:', topAnchor);
+    if (anchor === currentPage) return [];
+    return filteredCountries.slice(
+      (anchor - 1) * perPage,
+      currentPage * perPage
+    );
+  }, [filteredCountries, perPage, currentPage, topAnchor]);
 
-      {isMobile && bottomPage < lastPage && (
-        <InfiniteScrollLoader
-          fetchCountries={fetchCountries}
-          page={bottomPage + 1}
-          setCountries={countries => {
-            setNextCountries(prev => [...prev, ...countries]);
-            setBottomPage(prev => Math.min(prev + 1, lastPage));
-          }}
-        />
-      )}
+  const moreCountries = useMemo(() => {
+    const anchor = Math.max(Math.min(botAnchor, lastPage), currentPage);
+    console.log('🚀 ~ InfiniteScroll ~ botAnchor:', botAnchor);
+    if (anchor === currentPage) return [];
+    return filteredCountries.slice(currentPage * perPage, botAnchor * perPage);
+  }, [filteredCountries, perPage, currentPage, botAnchor, lastPage]);
+
+  return (
+    <div className="h-full flex flex-col">
+      <div ref={containerRef} className="flex-1 min-h-0 overflow-y-auto">
+        {isMobile && topAnchor > 1 && (
+          <InfiniteScrollLoader
+            isPending={isTopPending}
+            onLoaderIntersect={() => handlerLoaderIntersect('top')}
+          />
+        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {isMobile &&
+            previousCountries.map(country => (
+              <CountryCard key={country.cca3} country={country} />
+            ))}
+          {children}
+          {isMobile &&
+            moreCountries.map(country => (
+              <CountryCard key={country.cca3} country={country} />
+            ))}
+        </div>
+        {isMobile && botAnchor < lastPage && (
+          <InfiniteScrollLoader
+            isPending={isBotPending}
+            onLoaderIntersect={() => handlerLoaderIntersect('bot')}
+          />
+        )}
+      </div>
     </div>
   );
 };

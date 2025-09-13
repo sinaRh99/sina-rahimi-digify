@@ -6,7 +6,13 @@ import { initializeStore, Provider } from './store';
 
 export type PreloadedStoreInterface = Pick<
   StoreInterface,
-  'currentPage' | 'perPage' | 'searchQuery' | 'totalCountries'
+  | 'currentPage'
+  | 'perPage'
+  | 'searchQuery'
+  | 'totalCountries'
+  | 'filteredCountries'
+  | 'topAnchor'
+  | 'botAnchor'
 >;
 
 export default function StoreProvider({

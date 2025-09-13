@@ -5,7 +5,6 @@ import { Country } from '@entities/country/model/types';
 import { CountryCard } from '@entities/country/ui';
 import { InfiniteScroll } from './InfiniteScroll';
 import { CountriesFilter } from './CountriesFilter';
-import { Pagination } from '@shared/ui/Pagination';
 import { HomeViewPagination } from './HomeViewPagination';
 
 interface Props {
@@ -22,7 +21,7 @@ Props) => {
     <div className="h-full flex flex-col">
       <CountriesFilter />
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="min-h-0 flex-1">
         <InfiniteScroll>
           {countries.map(country => (
             <CountryCard key={country.cca3} country={country} />

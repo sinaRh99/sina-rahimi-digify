@@ -41,6 +41,9 @@ export default async function Home({ searchParams }: Props) {
   return (
     // I'm passing Initial data to my store
     <StoreProvider
+      topAnchor={validCurrentPage}
+      botAnchor={validCurrentPage}
+      filteredCountries={filteredCountries}
       currentPage={validCurrentPage}
       perPage={dataPerPage}
       searchQuery={search}
