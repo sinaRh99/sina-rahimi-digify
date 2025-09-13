@@ -1,10 +1,14 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Countries Explorer
 
-## Getting Started
+یک اپلیکیشن وب که فهرستی از کشورهای دنیا را نمایش می‌دهد و امکان جستجو، فیلتر، pagination و infinite scroll را فراهم می‌کند.
 
-First, run the development server:
+💻 **دموی آنلاین:** [Live Demo](https://sina-rahimi-digify.vercel.app/?page=3)
 
-```bash
+---
+
+## نوحه اجرا
+
+````bash
 npm run dev
 # or
 yarn dev
@@ -12,25 +16,39 @@ yarn dev
 pnpm dev
 # or
 bun dev
-```
+‍‍‍‍‍```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ساختار پروژه
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+من از معماری **FSD (Feature Sliced Design)** استفاده کرده‌ام ([مستندات](https://feature-sliced.design/docs/get-started/overview)).
+بطور کلی، فلسفه این معماری را دوست دارم و تقسیم اپلیکیشن به موجودیت‌ها، فیچرها و ویجت‌های کوچک‌تر، کدنویسی را برایم لذت‌بخش‌تر می‌کند.
+سعی کردم کامپوننت‌ها و بلوک‌های UI که ممکن است در آینده قابل استفاده مجدد باشند را تا جای ممکن **reusable** بنویسم.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## عملکرد پروژه
 
-To learn more about Next.js, take a look at the following resources:
+### بارگذاری اولیه
+- پروژه ابتدا داده‌ها را از API روی سرور fetch می‌کند.
+- یک **helper function** به نام `fetcher` ایجاد شده که قابلیت استفاده مجدد دارد.
+- نتیجه درخواست‌ها با **cache** ذخیره می‌شود تا در ریکوئست‌های بعدی، پاسخ از cache گرفته شود.
+- HTML اولیه با داده‌ها روی سرور ساخته می‌شود.
+- مقادیر اولیه مورد نیاز Store که باید در first load پروژه مقداردهی شوند ست شده و صفحه اول رندر می‌شود.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### ویو دسکتاپ
+- کامپوننت **Pagination** تغییرات URL Param برای جستجو را مدیریت می‌کند.
+- پس از لود اولیه، تنها داده‌های JSON از سرور دریافت می‌شوند و مرورگر صفحات بعدی را رندر می‌کند.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### ویو موبایل
+- چندین راه حل بررسی شد:
 
-## Deploy on Vercel
+  1. تشخیص موبایل یا دسکتاپ در سرور و لود صفحه متناسب: باعث می‌شد پروژه **ریسپانسیو** نباشد و تغییر سایز مرورگر به درستی کار نکند.
+  2. پیاده‌سازی کامل Infinite Scroll روی client-side: با توجه به اینکه تسک نیاز داشت صفحه اول SSR باشد، امکان پیاده‌سازی جداگانه نبود.
+  3. رندر داده‌ها تا صفحه فعلی و سپس ادامه با Infinite Scroll: اگر کاربر صفحه موبایل ۳۰ را باز کند، مرورگر فشار زیادی متحمل می‌شود که مناسب نیست.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- در نتیجه، Infinite Scroll به صورت یک **client-side component** دور داده‌های اولیه سمت سرور wrap شده است.
+- با دو **loader** در بالا و پایین داده‌ها، اسکرول به بالا و پایین مدیریت می‌شود تا داده‌های بیشتری لود شود.
+- با دو **anchor** میزان داده‌های لود شده قبل و بعد صفحه سرور مدیریت می‌شود.
+- تصاویر به صورت **lazy load** بارگذاری می‌شوند.
+````
