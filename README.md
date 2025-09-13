@@ -126,3 +126,16 @@ By combining **SSR for the initial render** with a **client-side InfiniteScrolle
 - **Optimized performance**: The client only loads additional slices of data when needed, without preloading all pages or maintaining a heavy virtualized list.
 
 ---
+
+## Details to Take Note Of
+
+- The pagination component integrates seamlessly with filtering.  
+  For example, if the user is on page **21** and applies filters that reduce the total number of pages, the pagination automatically adjusts itself to the new data and highlights the correct page. This works even when the URL query params are requesting an out-of-range page.
+
+- Searching, filtering, or changing the `perPage` value resets the infinite scroll state based on the correctly calculated `pageNumber`.
+
+- When a user is on a specific page and the screen resizes to mobile view, infinite scroll continues rendering content starting from that exact page. This ensures paginated data is not lost during the transition.
+
+- The search input remains responsive and does not lag while typing. This is achieved by debouncing updates to search params and handling them inside a `useTransition` component.
+
+- Switching between desktop and mobile view resets the state of the infinite scroll component. This prevents a large bulk of data from being rendered all at once during view transitions.
