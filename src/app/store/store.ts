@@ -1,13 +1,19 @@
-import { createContext, useContext } from 'react';
-import { createStore, useStore as useZustandStore } from 'zustand';
-import { PreloadedStoreInterface } from './StoreProvider';
-import { Country } from '@entities/country/model/types';
+import { createContext, useContext } from "react";
+import { createStore, useStore as useZustandStore } from "zustand";
+import { PreloadedStoreInterface } from "./StoreProvider";
+import { Country } from "@entities/country/model/types";
+
+const minMax = (num: number, min: number, max: number) => {
+  return Math.max(Math.min(num, max), min);
+};
 
 /**
  * Interface defining the global store state and actions.
  */
-export interface StoreInterface {
+
+export interface StoreState {
   currentPage: number;
+  lastPage: number;
   perPage: number;
   searchQuery: string;
   totalCountries: Country[];
@@ -15,10 +21,14 @@ export interface StoreInterface {
   topAnchor: number;
   botAnchor: number;
 
+  previousCountries: Country[];
+  moreCountries: Country[];
+}
+
+export interface StoreInterface extends StoreState {
   setCurrentPage: (page: number) => void;
   setPerPage: (perPage: number) => void;
   setSearchQuery: (query: string) => void;
-  getLastPage: () => number;
   setTopAnchor: (anchor: number) => void;
   setBotAnchor: (anchor: number) => void;
 }
@@ -26,15 +36,19 @@ export interface StoreInterface {
 /**
  * Returns the default initial state for the store.
  */
-function getDefaultInitialState() {
+function getDefaultInitialState(): StoreState {
   return {
     currentPage: 1,
+    lastPage: 1,
     perPage: 12,
-    searchQuery: '',
+    searchQuery: "",
     totalCountries: [],
+    filteredCountries: [],
     topAnchor: 1,
     botAnchor: 1,
-  } as const;
+    previousCountries: [],
+    moreCountries: [],
+  };
 }
 
 export type StoreType = ReturnType<typeof initializeStore>;
@@ -53,7 +67,7 @@ export const Provider = storeContext.Provider;
 export function useStore<T>(selector: (state: StoreInterface) => T) {
   const store = useContext(storeContext);
 
-  if (!store) throw new Error('Store is missing the provider');
+  if (!store) throw new Error("Store is missing the provider");
 
   return useZustandStore(store, selector);
 }
@@ -71,62 +85,82 @@ export function initializeStore(preloadedState: PreloadedStoreInterface) {
     /**
      * Sets the current page and updates top/bottom anchors accordingly.
      */
-    setCurrentPage: currentPage => {
-      const { getLastPage } = get();
+    setCurrentPage: (currentPage) => {
+      const { lastPage } = get();
+      const page = minMax(currentPage, 1, lastPage);
       return set({
-        currentPage: Math.min(currentPage, getLastPage()),
-        topAnchor: currentPage,
-        botAnchor: currentPage,
+        currentPage: page,
+        topAnchor: page,
+        botAnchor: page,
+        previousCountries: [],
+        moreCountries: [],
       });
     },
 
     /**
      * Updates the number of items per page and adjusts the current page if necessary.
      */
-    setPerPage: perPage =>
-      set({
+    setPerPage: (perPage) => {
+      const { filteredCountries, currentPage } = get();
+      const lastPage = Math.ceil(filteredCountries.length / perPage);
+      const page = minMax(currentPage, 1, lastPage);
+      return set({
         perPage,
-        currentPage: Math.min(get().getLastPage(), get().currentPage),
-      }),
+        lastPage,
+        currentPage: page,
+        topAnchor: page,
+        botAnchor: page,
+        previousCountries: [],
+        moreCountries: [],
+      });
+    },
 
     /**
      * Updates the search query and recalculates filteredCountries.
      * Also adjusts the current page to not exceed last page.
      */
-    setSearchQuery: searchQuery => {
-      const { totalCountries, getLastPage, currentPage } = get();
-      const filteredCountries = totalCountries.filter(country =>
+    setSearchQuery: (searchQuery) => {
+      const { totalCountries, currentPage, perPage } = get();
+      const filteredCountries = totalCountries.filter((country) =>
         `${country.name.common}${country.cca3}`
           .toLowerCase()
           .includes(searchQuery.toLowerCase())
       );
+      const lastPage = Math.ceil(filteredCountries.length / perPage);
+      const page = minMax(currentPage, 1, lastPage);
       return set({
         searchQuery,
         filteredCountries,
-        currentPage: Math.min(getLastPage(), currentPage),
+        lastPage,
+        currentPage: page,
+        topAnchor: page,
+        botAnchor: page,
+        previousCountries: [],
+        moreCountries: [],
       });
     },
 
-    /**
-     * Returns the last available page based on filteredCountries and perPage.
-     */
-    getLastPage: () => {
-      const { filteredCountries, perPage } = get();
-      return Math.max(Math.ceil(filteredCountries.length / perPage), 1);
-    },
-
-    /**
-     * Returns the current page, ensuring it does not exceed last page.
-     */
-    getCurrentPage: () => {
-      const { getLastPage, currentPage } = get();
-      return Math.min(currentPage, getLastPage());
-    },
-
     /** Updates the top-side anchor for infinite scroll */
-    setTopAnchor: topAnchor => set({ topAnchor }),
+    setTopAnchor: (topAnchor) => {
+      const { filteredCountries, perPage, currentPage } = get();
+      const previousCountries =
+        topAnchor === currentPage
+          ? []
+          : filteredCountries.slice(
+              (topAnchor - 1) * perPage,
+              (currentPage - 1) * perPage
+            );
+      return set({ topAnchor, previousCountries });
+    },
 
     /** Updates the bottom-side anchor for infinite scroll */
-    setBotAnchor: botAnchor => set({ botAnchor }),
+    setBotAnchor: (botAnchor) => {
+      const { filteredCountries, perPage, currentPage } = get();
+      const moreCountries =
+        botAnchor === currentPage
+          ? []
+          : filteredCountries.slice(currentPage * perPage, botAnchor * perPage);
+      return set({ botAnchor, moreCountries });
+    },
   }));
 }

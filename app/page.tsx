@@ -1,6 +1,6 @@
-import StoreProvider from '@app/store/StoreProvider';
-import { readAllCountries } from '@entities/country/api';
-import { HomeView } from '@views/home';
+import StoreProvider from "@app/store/StoreProvider";
+import { readAllCountries } from "@entities/country/api";
+import { HomeView } from "@views/home";
 interface Props {
   searchParams: Promise<{ page?: string; perPage?: string; search?: string }>;
 }
@@ -8,7 +8,7 @@ interface Props {
 export default async function Home({ searchParams }: Props) {
   // I'm reading current page and data per page from search params
   // I'm passing default value because search params are always string or undefined
-  const { page = '1', perPage = '12', search = '' } = await searchParams;
+  const { page = "1", perPage = "12", search = "" } = await searchParams;
   // I'm converting them to number
   const currentPage = Number(page);
   const dataPerPage = Number(perPage);
@@ -20,7 +20,7 @@ export default async function Home({ searchParams }: Props) {
 
   // I'm filtering countries based on their name and cca
   const filteredCountries =
-    data?.filter(country =>
+    data?.filter((country) =>
       `${country.name.common}${country.cca3}`
         .toLowerCase()
         .includes(search.toLowerCase())
@@ -41,11 +41,12 @@ export default async function Home({ searchParams }: Props) {
   return (
     // I'm passing Initial data to my store
     <StoreProvider
+      currentPage={validCurrentPage}
+      perPage={dataPerPage}
+      lastPage={lastPage}
       topAnchor={validCurrentPage}
       botAnchor={validCurrentPage}
       filteredCountries={filteredCountries}
-      currentPage={validCurrentPage}
-      perPage={dataPerPage}
       searchQuery={search}
       totalCountries={data || []}
     >

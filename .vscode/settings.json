@@ -11,6 +11,7 @@
     "shared/libs/hooks",
     "shared/model/types",
     "shared/ui/text-field",
-    "shared/ui/select"
+    "shared/ui/select",
+    "app/store"
   ]
 }

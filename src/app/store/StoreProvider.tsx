@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { type PropsWithChildren, useRef } from 'react';
-import type { StoreInterface, StoreType } from './store';
-import { initializeStore, Provider } from './store';
+import { type PropsWithChildren, useRef } from "react";
+import type { StoreInterface, StoreType } from "./store";
+import { initializeStore, Provider } from "./store";
 
 /**
  * PreloadedStoreInterface
@@ -11,13 +11,14 @@ import { initializeStore, Provider } from './store';
  */
 export type PreloadedStoreInterface = Pick<
   StoreInterface,
-  | 'currentPage'
-  | 'perPage'
-  | 'searchQuery'
-  | 'totalCountries'
-  | 'filteredCountries'
-  | 'topAnchor'
-  | 'botAnchor'
+  | "currentPage"
+  | "lastPage"
+  | "perPage"
+  | "searchQuery"
+  | "totalCountries"
+  | "filteredCountries"
+  | "topAnchor"
+  | "botAnchor"
 >;
 
 /**

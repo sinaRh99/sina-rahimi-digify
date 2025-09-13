@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * HomeViewPagination component.
@@ -7,11 +7,11 @@
  * - Uses the shared `Pagination` UI component, which is "dumb" and does not manage its own state.
  * - Logic for reading and updating the current page is done here.
  */
-import { useStore } from '@app/store/store';
-import { Pagination } from '@shared/ui/Pagination';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { memo } from 'react';
-import { useShallow } from 'zustand/shallow';
+import { useStore } from "@app/store/store";
+import { Pagination } from "@shared/ui/Pagination";
+import { useSearchParams, useRouter } from "next/navigation";
+import { memo } from "react";
+import { useShallow } from "zustand/shallow";
 
 /**
  * Custom hook to select the pagination state from the global store.
@@ -22,10 +22,10 @@ import { useShallow } from 'zustand/shallow';
  */
 const usePaginationData = () =>
   useStore(
-    useShallow(store => ({
+    useShallow((store) => ({
       currentPage: store.currentPage,
       setCurrentPage: store.setCurrentPage,
-      lastPage: store.getLastPage(),
+      lastPage: store.lastPage,
     }))
   );
 
@@ -51,7 +51,7 @@ export const HomeViewPagination = memo(function HomeViewPagination() {
     if (page === currentPage) return;
 
     const params = new URLSearchParams(searchParams.toString());
-    params.set('page', page.toString());
+    params.set("page", page.toString());
     router.push(`?${params.toString()}`);
 
     setCurrentPage(page);
