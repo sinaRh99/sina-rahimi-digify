@@ -1,10 +1,17 @@
-// This is a temporary loading state component for the Home view.
-// It uses CountryCardSkeleton component to show loading placeholders
-
+/**
+ * HomeLoading component.
+ *
+ * Displays a temporary loading state for the Home view.
+ * Uses `CountryCardSkeleton` to show placeholders while data is being fetched.
+ *
+ * @remarks
+ * - Renders 12 skeleton cards by default.
+ * - Layout uses a responsive grid to match the Home view design.
+ */
 import { CountryCardSkeleton } from '@entities/country/ui';
 
 export const HomeLoading = () => {
-  // Creating an array of 12 items to render 12 skeleton cards
+  // Generate an array of 12 items to render placeholder skeletons.
   const items = Array.from({ length: 12 }, (_, index) => index);
 
   return (

@@ -1,21 +1,31 @@
-// Its a simple hook for handling debouncing
-// its useful when using with search inputs or any inputs that needs to do some heavy task when it's value changes
-// I've made it a hook to use this logic inside multiple components
-
 import { useState, useEffect } from 'react';
 
+/**
+ * Custom React hook for handling debouncing.
+ *
+ * Debouncing ensures that a function (like an API call or an expensive calculation)
+ * only runs after the user stops typing for a specified delay.
+ *
+ * This is especially useful for:
+ * - Search inputs (avoid sending a request on every keystroke).
+ * - Filtering large lists.
+ * - Any expensive task that shouldn't run on every small input change.
+ *
+ * @param value The input value to debounce (usually a string).
+ * @param delay The debounce delay in milliseconds. Default is 300ms.
+ * @returns The debounced value that updates only after the delay has passed.
+ */
 export function useDebounce(value: string, delay: number = 300): string {
   const [debouncedValue, setDebouncedValue] = useState(value);
 
-  // inside the useEffect we will set the debouncedValue after a specified timeout passed from first key stroke
-  // this way if the user is still typing we can wait until it finishes typing
-  // and this hook returns debounced value and we can handle our async task or expensive task based on changes of debounced value
   useEffect(() => {
+    // Set a timer that updates debouncedValue after "delay" ms
     const handler = setTimeout(() => {
       setDebouncedValue(value);
     }, delay);
 
-    // Cleanup if value changes before delay ends
+    // If "value" changes before the delay finishes,
+    // clear the timeout to avoid unnecessary updates
     return () => clearTimeout(handler);
   }, [value, delay]);
 

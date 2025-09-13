@@ -1,12 +1,47 @@
-// I've put Pagination inside @shared because it might be used in other places later.
-// Also, it's not big enough to be considered a feature that's why i didn't place it on @features
 'use client';
 
+/**
+ * A reusable, stateless pagination component.
+ *
+ * - Placed under `@shared` for use across multiple features and pages.
+ * - Designed to be "dumb" (stateless) for maximum flexibility:
+ *   - Does not manage pagination state internally.
+ *   - Does not handle conditional rendering (e.g., hiding on mobile).
+ *   - Consumers are responsible for managing `currentPage`, `lastPage`,
+ *     and when/how the component is shown.
+ */
 interface Props {
+  /**
+   * The currently active page number.
+   * Used to highlight the corresponding page button.
+   */
   currentPage: number;
+
+  /**
+   * The maximum page number.
+   * Defines the upper bound of pagination.
+   */
   lastPage: number;
+
+  /**
+   * Number of adjacent pages to display
+   * before and after the current page.
+   *
+   * @default 1
+   */
   padding?: number;
+
+  /**
+   * Optional CSS class names applied to the root container.
+   * Useful for layout or style overrides.
+   */
   className?: string;
+
+  /**
+   * Callback fired when a page button is clicked.
+   *
+   * @param page - The page number that was clicked.
+   */
   onPageChange: (page: number) => void;
 }
 
@@ -17,20 +52,24 @@ export const Pagination = ({
   className,
   onPageChange,
 }: Props) => {
-  // I'm using min and max to calculate the start and end page numbers
-  // This way I can ensure that the pagination links don't go out of bounds
-  // e.g if current page is 1 and padding is 2, I don't want to show -1, 0, 1, 2, 3
+  // Determine the visible range of page numbers.
+  // Math.max ensures the start is at least 1.
+  // Math.min ensures the end does not exceed `lastPage`.
+  //
+  // Example: currentPage=1, padding=2 → start=1, end=3 → [1,2,3].
   const start = Math.max(currentPage - padding, 1);
   const end = Math.min(currentPage + padding, lastPage);
-  // Generate an array of pages, I'm using Set to remove duplicate results
 
+  // Build the list of visible pages.
+  // - Always include the first and last pages.
+  // - Include the range around the current page (`start` → `end`).
+  // - Wrap in a Set to avoid duplicates when ranges overlap with
+  //   the first/last page.
+  //
+  // Example: currentPage=5, padding=2, lastPage=10 → [1, 3,4,5,6,7, 10].
   const pages = [
     ...new Set([
       1,
-      // I'm  calculating how much pagination links must be visible
-      // I'm getting padding from props, so if padding is 1 and current page is 5
-      // I want to show 4, 5, 6
-      // if padding is 2 and current page is 5, I want to show 3, 4, 5, 6, 7
       ...Array.from({ length: end - start + 1 }, (_, i) => start + i),
       lastPage,
     ]),
@@ -39,7 +78,8 @@ export const Pagination = ({
   return (
     <div className={`flex gap-2 justify-center ${className}`}>
       {pages.map((page, i) => {
-        // I'm checking to see if there is any gap between current page and previous page so i could show ... when we there is a gap
+        // Check for a gap between this page and the previous one.
+        // If a gap exists, render "..." as a visual separator.
         const noGap = !pages[i - 1] || page - pages[i - 1] === 1;
 
         return (

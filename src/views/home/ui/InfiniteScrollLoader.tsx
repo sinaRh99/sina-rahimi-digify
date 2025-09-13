@@ -1,15 +1,20 @@
 'use client';
 
-// simple loader block for showing loading animation when we are fetching data
-// I've created this in a separate component because I want to use it both at the top and bottom of the page
-// We pass ref from InfiniteScroll component and observe the loader intersection
-// after the loader is fully intersected we fetch data
-
+/**
+ * InfiniteScrollLoader component.
+ *
+ * - Simple loader block for showing a loading animation while fetching data.
+ * - Created as a separate component to be used both at the top and bottom of the page.
+ * - Receives a ref from `InfiniteScroll` and observes its intersection with the viewport.
+ * - Calls `onLoaderIntersect` once fully intersected to trigger data fetching.
+ */
 import { useEffect, useRef, useState } from 'react';
 import { useIsMobile } from '@shared/lib/hooks/useIsMobile';
 
 interface Prop {
+  /** Indicates if a data fetch operation is currently pending */
   isPending?: boolean;
+  /** Callback triggered when the loader fully intersects the viewport */
   onLoaderIntersect: () => void;
 }
 
@@ -22,22 +27,21 @@ export const InfiniteScrollLoader = ({
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    // I know top loader is always going to be there but I am checking it just to avoid typescript errors
-    // also I don't want to observe them is desktop view so I'm checking isMobile too
+    // Top loader is always present, but we check to avoid TypeScript errors
+    // Also, we only observe on mobile to prevent unnecessary observers on desktop
     if (!loaderRef.current || !isMobile) return;
 
     const loader = loaderRef.current;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setProgress(entry.intersectionRatio); // sets the progress of loader spinner based on intersection ratio
+        // Sets the loader spinner progress based on intersection ratio
+        setProgress(entry.intersectionRatio);
       },
       {
-        // I'm passing threshold array from 0 to 1 with step of 0.01
-        // So I can get more granular intersection ratio
-        // And I can use it to show progress of the loader
-        // This way user will notice that he/she can see more data by scrolling
-        threshold: Array.from({ length: 101 }, (_, i) => i / 100), // [0, 0.01, 0.02, ..., 1]
+        // Threshold array from 0 to 1 in steps of 0.01 for granular intersection detection
+        // This allows the loader to visually indicate progress to the user
+        threshold: Array.from({ length: 101 }, (_, i) => i / 100),
       }
     );
 
@@ -49,6 +53,7 @@ export const InfiniteScrollLoader = ({
   }, [isMobile]);
 
   useEffect(() => {
+    // Trigger data fetch when fully intersected and no pending operation
     if (progress === 1 && !isPending) {
       onLoaderIntersect();
     }
@@ -60,6 +65,7 @@ export const InfiniteScrollLoader = ({
       className="pt-8 pb-4 w-full flex flex-col items-center justify-center relative"
     >
       <div className="w-14 h-14 bg-slate-900 rounded-full flex items-center justify-center relative overflow-hidden">
+        {/* Animated overlay showing progress */}
         <div
           className="w-14 h-14 bg-white absolute right-full"
           style={{
