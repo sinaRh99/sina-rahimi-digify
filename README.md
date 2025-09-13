@@ -84,6 +84,8 @@ User can continue scrolling until:
 - First page is reached (top)
 - Last page is reached (bottom)
 
+```
+
 ---
 
 ## Why This Approach
@@ -91,29 +93,36 @@ User can continue scrolling until:
 It’s better to first explain the alternative approaches I considered and why I decided against them. These trade-offs eventually led me to the current solution.
 
 ### 1. Server-side Agent Detection
+
 One option was to check the user agent on the server and decide whether to render the desktop or mobile view of the application.
+
 - **Problem:** The application would not be **responsive**. It would only handle the initial render correctly, but it wouldn’t adapt if the user resized the window or switched devices.
 
 ---
 
 ### 2. Dedicated Client-side Infinite Scroll (Starting at Page 1)
+
 Another approach was to create a dedicated client-side component that renders everything in the mobile view starting from page 1 and only responds to scrolling down. This is a common way infinite scrolling is usually implemented.
+
 - **Problem:** While simpler to build, this approach is **not SEO-friendly**. Since all HTML would be rendered on the client, search engines would not have meaningful server-rendered content to index, reducing discoverability and performance in search results.
 
 ---
 
 ### 3. Prepending All Pages Up to Current Page
+
 In the `InfiniteScrollerWrapper` component, I could have rendered HTML for all pages from the first page up to the current one and prepended it before the server-rendered HTML. Then, I would only add a bottom loader to handle scrolling down.
+
 - **Problem:** This becomes highly inefficient when the user lands on a relatively high page (e.g., page 20), since it would require rendering the content of 19 previous pages immediately.
 - The only way to optimize this would be to implement **virtual scrolling** (rendering only the slice of data currently visible and removing everything off-screen). But this again requires a **dedicated client-side rendering solution**, leading back to the same SEO problem as in approach #2.
 
 ---
 
 ### Why the Current Approach Works Best
+
 By combining **SSR for the initial render** with a **client-side InfiniteScroller wrapper**, the chosen solution achieves a balance of:
+
 - **Responsiveness**: The app adapts dynamically to screen width changes instead of locking to the first request’s view.
 - **SEO friendliness**: Initial HTML is rendered on the server and is crawlable by search engines.
 - **Optimized performance**: The client only loads additional slices of data when needed, without preloading all pages or maintaining a heavy virtualized list.
 
 ---
-```
