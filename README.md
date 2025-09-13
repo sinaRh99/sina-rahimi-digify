@@ -1,59 +1,54 @@
 # Countries Explorer
 
-💻 **دموی آنلاین:** [Live Demo](https://sina-rahimi-digify.vercel.app/?page=3)
+A web application that displays a list of countries and provides search, filter, pagination, and infinite scroll functionality.
 
----
-
-## نوحه اجرا
+💻 **Live Demo:** [https://sina-rahimi-digify.vercel.app](https://sina-rahimi-digify.vercel.app)
 
 ```bash
+# Development
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Production
+npm run build
+npm run start
 ```
 
 ---
 
-## ساختار پروژه
+## Project Structure
 
-من از معماری **FSD (Feature Sliced Design)** استفاده کرده‌ام ([مستندات](https://feature-sliced.design/docs/get-started/overview)).
-بطور کلی، فلسفه این معماری را دوست دارم و تقسیم اپلیکیشن به موجودیت‌ها، فیچرها و ویجت‌های کوچک‌تر، کدنویسی را برایم لذت‌بخش‌تر می‌کند.
-سعی کردم کامپوننت‌ها و بلوک‌های UI که ممکن است در آینده قابل استفاده مجدد باشند را تا جای ممکن **reusable** بنویسم.
+The project is organized using **Feature Sliced Design (FSD)** ([documentation](https://feature-sliced.design/docs/get-started/overview)).  
+I personally like the philosophy of this architecture: splitting the application into entities, features, and smaller widgets makes coding more enjoyable.  
+I also tried to write components and UI blocks that might be **reusable** in the future whenever possible.
 
 ---
 
-## عملکرد پروژه
+## Project Functionality
 
-### بارگذاری اولیه
+### Initial Load
 
-- پروژه ابتدا داده‌ها را از API روی سرور fetch می‌کند.
-- یک **helper function** به نام `fetcher` ایجاد شده که قابلیت استفاده مجدد دارد.
-- نتیجه درخواست‌ها با **cache** ذخیره می‌شود تا در ریکوئست‌های بعدی، پاسخ از cache گرفته شود.
-- HTML اولیه با داده‌ها روی سرور ساخته می‌شود.
-- مقادیر اولیه مورد نیاز Store که باید در first load پروژه مقداردهی شوند ست شده و صفحه اول رندر می‌شود.
+- The project fetches data from the API on the server initially.
+- A **helper function** called `fetcher` is created for reusable API requests.
+- API responses are **cached** so that subsequent requests return the cached data directly.
+- The initial HTML is rendered on the server using the fetched data.
+- The store is initialized with the required initial values during the first load, and the first page is built.
 
-### ویو دسکتاپ
+### Desktop View
 
-- کامپوننت **Pagination** تغییرات URL Param برای جستجو را مدیریت می‌کند.
-- پس از لود اولیه، تنها داده‌های JSON از سرور دریافت می‌شوند و مرورگر صفحات بعدی را رندر می‌کند.
+- The **Pagination** component manages URL parameters for search.
+- After the first load, only JSON data is fetched from the server, and the browser renders the HTML for the subsequent pages.
 
-### ویو موبایل
+### Mobile View
 
-- چندین راه حل بررسی شد:
+- Several approaches were considered:
 
-  1. تشخیص موبایل یا دسکتاپ در سرور و لود صفحه متناسب: باعث می‌شد پروژه **ریسپانسیو** نباشد و تغییر سایز مرورگر به درستی کار نکند.
-  2. پیاده‌سازی کامل Infinite Scroll روی client-side: با توجه به اینکه تسک نیاز داشت صفحه اول SSR باشد، امکان پیاده‌سازی جداگانه نبود.
-  3. رندر داده‌ها تا صفحه فعلی و سپس ادامه با Infinite Scroll: اگر کاربر صفحه موبایل ۳۰ را باز کند، مرورگر فشار زیادی متحمل می‌شود که مناسب نیست.
+  1. Detect mobile or desktop on the server and load the corresponding page: This would make the app **less responsive** to browser resizing.
+  2. Implement full client-side Infinite Scroll: Not feasible because the task required the first page to be **SSR**.
+  3. Render all data up to the current page and then continue with Infinite Scroll: If a user opened page 30 on mobile, the browser would be overloaded, affecting performance.
 
-- در نتیجه، Infinite Scroll به صورت یک **client-side component** دور داده‌های اولیه سمت سرور wrap شده است.
-- با دو **loader** در بالا و پایین داده‌ها، اسکرول به بالا و پایین مدیریت می‌شود تا داده‌های بیشتری لود شود.
-- با دو **anchor** میزان داده‌های لود شده قبل و بعد صفحه سرور مدیریت می‌شود.
-- تصاویر به صورت **lazy load** بارگذاری می‌شوند.
+- As a result, Infinite Scroll is implemented as a **client-side component** wrapping the initial server-side data.
+- Two **loaders** are used at the top and bottom of the content to handle scrolling both upwards and downwards, loading more data as needed.
+- Two **anchors** track how much data has been loaded before and after the server-rendered page.
+- Images are loaded with **lazy loading** for performance.
 
-```
-
-```
+---
