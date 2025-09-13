@@ -11,6 +11,7 @@ import { initializeStore, Provider } from "./store";
  */
 export type PreloadedStoreInterface = Pick<
   StoreInterface,
+  | "page"
   | "currentPage"
   | "lastPage"
   | "perPage"

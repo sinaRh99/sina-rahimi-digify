@@ -34,6 +34,7 @@ const useCountries = () =>
   useStore(
     useShallow((store) => ({
       previousCountries: store.previousCountries,
+      resetPagination: store.resetPagination,
       moreCountries: store.moreCountries,
       lastPage: store.lastPage,
       topAnchor: store.topAnchor,
@@ -59,8 +60,11 @@ export const InfiniteScroll = ({ children }: Props) => {
     lastPage,
     botAnchor,
     setBotAnchor,
+    resetPagination,
   } = useCountries();
+  console.log("🚀 ~ InfiniteScroll ~ topAnchor:", topAnchor);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isListenerAttachedRef = useRef(false);
 
   // Transitions prevent UI blocking and allow loaders to wait until previous operation finishes.
   const [isTopPending, startTopTransition] = useTransition();
@@ -76,7 +80,11 @@ export const InfiniteScroll = ({ children }: Props) => {
    * - Sets a flag so the top loader only triggers after the first user scroll event.
    */
   useEffect(() => {
-    if (!containerRef.current || !isMobile) return;
+    if (!containerRef.current || isListenerAttachedRef.current) return;
+
+    if (!isMobile) {
+      resetPagination();
+    }
 
     const container = containerRef.current;
 
@@ -88,8 +96,11 @@ export const InfiniteScroll = ({ children }: Props) => {
 
     containerRef.current.scrollTo({ top: 240 });
 
+    isListenerAttachedRef.current = true;
+
     return () => {
       container.removeEventListener("scroll", handleScroll);
+      isListenerAttachedRef.current = false;
     };
   }, [isMobile]);
 
@@ -118,7 +129,8 @@ export const InfiniteScroll = ({ children }: Props) => {
     <div className="h-full flex flex-col">
       <div ref={containerRef} className="flex-1 min-h-0 overflow-y-auto">
         {/* Top-side loader */}
-        {isMobile && topAnchor > 1 && (
+
+        {topAnchor > 1 && (
           <InfiniteScrollLoader
             isPending={isTopPending}
             onLoaderIntersect={() => handlerLoaderIntersect("top")}
@@ -127,23 +139,22 @@ export const InfiniteScroll = ({ children }: Props) => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {/* Previous countries (prepended at the top) */}
-          {isMobile &&
-            previousCountries.map((country) => (
-              <CountryCard key={country.cca3} country={country} />
-            ))}
+          {previousCountries.map((country) => (
+            <CountryCard key={country.cca3} country={country} />
+          ))}
 
           {/* Server-side rendered children */}
           {children}
 
           {/* More countries (appended at the bottom) */}
-          {isMobile &&
-            moreCountries.map((country) => (
-              <CountryCard key={country.cca3} country={country} />
-            ))}
+          {moreCountries.map((country) => (
+            <CountryCard key={country.cca3} country={country} />
+          ))}
         </div>
 
         {/* Bottom-side loader */}
-        {isMobile && botAnchor < lastPage && (
+
+        {botAnchor < lastPage && (
           <InfiniteScrollLoader
             isPending={isBotPending}
             onLoaderIntersect={() => handlerLoaderIntersect("bot")}

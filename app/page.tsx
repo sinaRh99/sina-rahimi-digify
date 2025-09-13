@@ -41,6 +41,7 @@ export default async function Home({ searchParams }: Props) {
   return (
     // I'm passing Initial data to my store
     <StoreProvider
+      page={validCurrentPage}
       currentPage={validCurrentPage}
       perPage={dataPerPage}
       lastPage={lastPage}

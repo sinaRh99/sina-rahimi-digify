@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * InfiniteScrollLoader component.
@@ -8,8 +8,8 @@
  * - Receives a ref from `InfiniteScroll` and observes its intersection with the viewport.
  * - Calls `onLoaderIntersect` once fully intersected to trigger data fetching.
  */
-import { useEffect, useRef, useState } from 'react';
-import { useIsMobile } from '@shared/lib/hooks/useIsMobile';
+import { useEffect, useRef, useState } from "react";
+import { useIsMobile } from "@shared/lib/hooks/useIsMobile";
 
 interface Prop {
   /** Indicates if a data fetch operation is currently pending */
@@ -62,7 +62,7 @@ export const InfiniteScrollLoader = ({
   return (
     <div
       ref={loaderRef}
-      className="pt-8 pb-4 w-full flex flex-col items-center justify-center relative"
+      className="pt-8 pb-4 w-full flex md:hidden flex-col items-center justify-center relative"
     >
       <div className="w-14 h-14 bg-slate-900 rounded-full flex items-center justify-center relative overflow-hidden">
         {/* Animated overlay showing progress */}

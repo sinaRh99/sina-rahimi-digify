@@ -20,6 +20,7 @@ const resetPagination = (page: number) => ({
  */
 
 export interface StoreState {
+  page: number;
   currentPage: number;
   lastPage: number;
   perPage: number;
@@ -39,6 +40,7 @@ export interface StoreInterface extends StoreState {
   setSearchQuery: (query: string) => void;
   setTopAnchor: (anchor: number) => void;
   setBotAnchor: (anchor: number) => void;
+  resetPagination: () => void;
 }
 
 /**
@@ -46,6 +48,7 @@ export interface StoreInterface extends StoreState {
  */
 function getDefaultInitialState(): StoreState {
   return {
+    page: 1,
     lastPage: 1,
     perPage: 12,
     searchQuery: "",
@@ -93,6 +96,7 @@ export function initializeStore(preloadedState: PreloadedStoreInterface) {
       const { lastPage } = get();
       const page = minMax(currentPage, 1, lastPage);
       return set({
+        page,
         ...resetPagination(page),
       });
     },
@@ -101,13 +105,13 @@ export function initializeStore(preloadedState: PreloadedStoreInterface) {
      * Updates the number of items per page and adjusts the current page if necessary.
      */
     setPerPage: (perPage) => {
-      const { filteredCountries, currentPage } = get();
+      const { filteredCountries, page } = get();
       const lastPage = Math.ceil(filteredCountries.length / perPage);
-      const page = minMax(currentPage, 1, lastPage);
+      const currentPage = minMax(page, 1, lastPage);
       return set({
         perPage,
         lastPage,
-        ...resetPagination(page),
+        ...resetPagination(currentPage),
       });
     },
 
@@ -116,19 +120,20 @@ export function initializeStore(preloadedState: PreloadedStoreInterface) {
      * Also adjusts the current page to not exceed last page.
      */
     setSearchQuery: (searchQuery) => {
-      const { totalCountries, currentPage, perPage } = get();
+      const { totalCountries, page, perPage } = get();
       const filteredCountries = totalCountries.filter((country) =>
         `${country.name.common}${country.cca3}`
           .toLowerCase()
           .includes(searchQuery.toLowerCase())
       );
       const lastPage = Math.ceil(filteredCountries.length / perPage);
-      const page = minMax(currentPage, 1, lastPage);
+      const currentPage = minMax(page, 1, lastPage);
+      console.log("🚀 ~ initializeStore ~ page:", page);
       return set({
         searchQuery,
         filteredCountries,
         lastPage,
-        ...resetPagination(page),
+        ...resetPagination(currentPage),
       });
     },
 
@@ -153,6 +158,11 @@ export function initializeStore(preloadedState: PreloadedStoreInterface) {
           ? []
           : filteredCountries.slice(currentPage * perPage, botAnchor * perPage);
       return set({ botAnchor, moreCountries });
+    },
+
+    resetPagination: () => {
+      const { page } = get();
+      return set({ ...resetPagination(page) });
     },
   }));
 }
