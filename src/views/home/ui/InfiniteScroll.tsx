@@ -78,7 +78,7 @@ export const InfiniteScroll = ({ children }: Props) => {
    * - Sets a flag so the top loader only triggers after the first user scroll event.
    */
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || !isMobile) return;
 
     const container = containerRef.current;
 
@@ -93,7 +93,7 @@ export const InfiniteScroll = ({ children }: Props) => {
     return () => {
       container.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, [isMobile]);
 
   /**
    * Updates anchors when loaders intersect with the viewport.
