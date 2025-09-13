@@ -10,7 +10,7 @@ import { useShallow } from 'zustand/shallow';
 const usePaginationData = () =>
   useStore(
     useShallow(store => ({
-      currentPage: store.getCurrentPage(),
+      currentPage: store.currentPage,
       setCurrentPage: store.setCurrentPage,
       lastPage: store.getLastPage(),
     }))

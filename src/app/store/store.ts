@@ -15,13 +15,8 @@ export interface StoreInterface {
   setPerPage: (perPage: number) => void;
   setSearchQuery: (query: string) => void;
   getLastPage: () => number;
-  getFilteredCountries: () => Country[];
-  getSlicedCountries: (page: number) => Country[];
-  getCurrentPage: () => number;
   setTopAnchor: (anchor: number) => void;
   setBotAnchor: (anchor: number) => void;
-  getPreviousCountries: () => Country[];
-  getMoreCountries: () => Country[];
 }
 
 function getDefaultInitialState() {
@@ -75,59 +70,14 @@ export function initializeStore(preloadedState: PreloadedStoreInterface) {
       return set({ searchQuery, filteredCountries });
     },
     getLastPage: () => {
-      const { getFilteredCountries, perPage } = get();
-      return Math.max(Math.ceil(getFilteredCountries().length / perPage), 1);
-    },
-    getFilteredCountries: () => {
-      const { searchQuery, totalCountries } = get();
-      return totalCountries.filter(country =>
-        `${country.name.common}${country.cca3}`
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase())
-      );
+      const { filteredCountries, perPage } = get();
+      return Math.max(Math.ceil(filteredCountries.length / perPage), 1);
     },
     getCurrentPage: () => {
       const { getLastPage, currentPage } = get();
       return Math.min(currentPage, getLastPage());
     },
-    getSlicedCountries: page => {
-      const { getFilteredCountries, perPage } = get();
-      return getFilteredCountries().slice((page - 1) * perPage, page * perPage);
-    },
     setTopAnchor: topAnchor => set({ topAnchor }),
     setBotAnchor: botAnchor => set({ botAnchor }),
-    getPreviousCountries: () => {
-      const { filteredCountries, perPage, getCurrentPage, topAnchor } = get();
-
-      const currentPage = getCurrentPage();
-      const anchor = Math.min(topAnchor, currentPage);
-
-      if (anchor === currentPage) return [];
-
-      return filteredCountries.slice(
-        (anchor - 1) * perPage,
-        currentPage * perPage
-      );
-    },
-    getMoreCountries: () => {
-      const {
-        getFilteredCountries,
-        perPage,
-        getCurrentPage,
-        botAnchor,
-        getLastPage,
-      } = get();
-
-      const lastPage = getLastPage();
-      const currentPage = getCurrentPage();
-      const anchor = Math.max(Math.min(botAnchor, lastPage), currentPage);
-
-      if (anchor === currentPage) return [];
-
-      return getFilteredCountries().slice(
-        currentPage * perPage,
-        botAnchor * perPage
-      );
-    },
   }));
 }
