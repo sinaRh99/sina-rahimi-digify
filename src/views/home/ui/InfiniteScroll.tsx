@@ -124,7 +124,7 @@ export const InfiniteScroll = ({ children }: Props) => {
      */
     if (!containerRef.current || !isMobile) return;
     const container = containerRef.current;
-    container.scrollTo({ top: 240 });
+    container.scrollTop = 100;
 
     /**
      * Adds a scroll event listener to the container if it hasn't been added yet.
@@ -176,7 +176,9 @@ export const InfiniteScroll = ({ children }: Props) => {
         startTopTransition(() => {
           setTopAnchor(topAnchor - 1);
           scrollTriggered.current = false;
-          containerRef.current?.scrollTo({ top: 240 });
+          if (containerRef.current) {
+            containerRef.current.scrollTop = 100;
+          }
         });
       }
     } else {
