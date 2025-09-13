@@ -15,7 +15,16 @@ npm run start
 
 ---
 
-## Project Organization
+# Table of Contents
+
+- [Organizing The Project](#organizing-the-project)
+- [Project Structure](#project-structure)
+- [Why This Approach](#why-this-approach)
+- [Details to Take Note Of](#details-to-take-note-of)
+
+---
+
+## Organizing The Project
 
 This project follows the principles of **Feature-Sliced Design (FSD)** ([documentation](https://feature-sliced.design/docs/get-started/overview)).
 
