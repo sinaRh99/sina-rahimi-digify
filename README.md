@@ -42,9 +42,20 @@ I also tried to write components and UI blocks that might be **reusable** in the
 
 - Several approaches were considered:
 
-  1. Detect mobile or desktop on the server and load the corresponding page: This would make the app **less responsive** to browser resizing.
-  2. Implement full client-side Infinite Scroll: Not feasible because the task required the first page to be **SSR**.
-  3. Render all data up to the current page and then continue with Infinite Scroll: If a user opened page 30 on mobile, the browser would be overloaded, affecting performance.
+  1. **Detect mobile/desktop on the server and load the corresponding page:**
+
+  - While this could allow different layouts for mobile and desktop, it would make the app **non-responsive**.
+  - Users resizing their browser or switching devices would not see a seamless experience, breaking the dynamic responsiveness of the app.
+
+2. **Implement full Infinite Scroll entirely on the client-side:**
+
+   - Infinite Scroll naturally requires client-side handling because it responds to user scroll events.
+   - However, the task required that the **first page and initial load be server-rendered (SSR)**.
+   - If I fully moved Infinite Scroll to the client, the first load would no longer have SSR benefits like SEO and faster initial rendering.
+
+3. **Render all pages up to the current page and then use Infinite Scroll:**
+   - This approach could work for desktop, where the user might navigate directly to page 5 and scroll seamlessly.
+   - On mobile, if the user opens a high page number (e.g., page 30), the browser would need to render an enormous amount of DOM nodes at once, causing **performance issues** and possibly crashing the page.
 
 - As a result, Infinite Scroll is implemented as a **client-side component** wrapping the initial server-side data.
 - Two **loaders** are used at the top and bottom of the content to handle scrolling both upwards and downwards, loading more data as needed.
